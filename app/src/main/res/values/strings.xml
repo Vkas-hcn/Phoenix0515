@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Phoenix0515</string>
+    <!-- res/values/strings.xml -->
+        <!-- Device Info Labels -->
+        <string name="device_state">Device State</string>
+        <string name="model">Model</string>
+        <string name="manufacturer">Manufacturer</string>
+        <string name="brand">Brand</string>
+        <string name="device">Device</string>
+        <string name="board">Board</string>
+        <string name="hardware">Hardware</string>
+        <string name="fingerprint">Fingerprint</string>
+        <string name="host_support">USB Host</string>
+        <string name="timezone">Timezone</string>
+        <string name="total_features">Total Features</string>
+
+        <!-- Permission Required Info -->
+        <string name="android_device_id">Android Device ID</string>
+        <string name="device_type">Device Type</string>
+        <string name="mac_address">MAC Address</string>
+        <string name="advertising_id">Advertising ID</string>
+
+        <!-- Error Messages -->
+        <string name="unavailable">Unavailable</string>
+        <string name="unknown">Unknown</string>
+        <string name="not_supported">Not Supported</string>
+
+</resources>
