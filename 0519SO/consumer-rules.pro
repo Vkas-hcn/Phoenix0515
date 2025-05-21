@@ -10,7 +10,7 @@
 -keep class kotlin.jvm.internal.** { *; }
 
 -keep class com.bytedance.sdk.** { *; }
-
+-dontshrink
 
 # Vungle
 -dontwarn com.vungle.ads.**
