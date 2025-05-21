@@ -1,7 +1,6 @@
 package com.thunderbolt.methods.bodhisattva.ui.detail.fragment
 
-
-
+import androidx.annotation.Keep
 
 
 sealed class DeviceViewState {
@@ -9,6 +8,7 @@ sealed class DeviceViewState {
     data class Success(val data: Data) : DeviceViewState()
     data class Error(val exception: Exception) : DeviceViewState()
 
+    @Keep
     data class Data(
         val deviceState: String = "",
         val model: String = "",

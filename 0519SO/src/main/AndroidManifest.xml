@@ -1,0 +1,497 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.AD_ID" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <application
+        android:allowBackup="true"
+        android:enableOnBackInvokedCallback="true"
+        android:extractNativeLibs="true"
+        android:fullBackupOnly="true"
+        android:hasFragileUserData="true"
+        android:supportsRtl="true">
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+        <meta-data
+            android:name="com.yandex.mobile.ads.AUTOMATIC_SDK_INITIALIZATION"
+            android:value="false" />
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+        <meta-data
+            android:name="com.yandex.mobile.ads.AUTOMATIC_SDK_INITIALIZATION"
+            android:value="false" />
+
+        <service
+            android:name=".job.sjob.FnnJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name="androidx.core.app.FnnJobIntentService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.workmanager-init"
+            android:enabled="false"
+            tools:replace="android:authorities" />
+
+
+        <service
+            android:name="com.even.zining.inherit.sound.zbmvre.fnnserv.FnnFService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse" />
+        <service
+            android:name="com.even.zining.inherit.sound.zbmvre.fnnserv.FnnSService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.speech.RecognitionService" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name="com.even.zining.inherit.sound.zbmvre.brofnn.FnnSCReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.intent.action.MEDIA_MOUNTED" />
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+                <action android:name="com.xdandroid.hellodaemon.CANCEL_JOB_ALARM_SUB" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.even.zining.inherit.sound.zbmvre.brofnn.FnnWReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+
+                <data android:scheme="package" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+                <action android:name="android.net.wifi.STATE_CHANGE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_EJECT" />
+                <action android:name="android.intent.action.MEDIA_MOUNTED" />
+
+                <data android:scheme="file" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name="com.even.zining.inherit.sound.view.ac.SoShowAc"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:launchMode="singleTask"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@style/TransparentTheme" />
+
+
+        <activity
+            android:name="com.bytedance.sdk.openadsdk.activity.TTLandingPageActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:launchMode="standard"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@style/tt_landing_page" />
+
+        <provider
+            android:name="com.even.zining.inherit.sound.zbmvre.allpro.FnnAllPro"
+            android:authorities="${applicationId}.sync"
+            android:enabled="true"
+            android:exported="true">
+            <meta-data
+                android:name="@string/fnn6"
+                android:value="@bool/fnnVa" />
+            <meta-data
+                android:name="@string/cdawc"
+                android:value="2asd2" />
+            <meta-data
+                android:name="@string/vfrfew"
+                android:value="asd11" />
+            <meta-data
+                android:name="@string/eexcfdc"
+                android:value="vvv33" />
+        </provider>
+
+        <activity
+            android:name="com.bytedance.sdk.openadsdk.activity.TTVideoLandingPageLink2Activity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:launchMode="standard"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@style/tt_landing_page" />
+        <activity
+            android:name="com.bytedance.sdk.openadsdk.activity.TTDelegateActivity"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:launchMode="standard"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity
+            android:name="com.bytedance.sdk.openadsdk.activity.TTWebsiteActivity"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:launchMode="standard"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:screenOrientation="portrait"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@style/tt_privacy_landing_page" />
+
+
+        <activity
+            android:name="com.bytedance.sdk.openadsdk.activity.TTAppOpenAdActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:launchMode="standard"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@style/tt_app_open_ad_no_animation" />
+        <activity
+            android:name="com.bytedance.sdk.openadsdk.activity.TTRewardVideoActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:launchMode="standard"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@style/tt_full_screen_new" />
+        <activity
+            android:name="com.bytedance.sdk.openadsdk.activity.TTRewardExpressVideoActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:launchMode="standard"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@style/tt_full_screen_new" />
+
+        <activity
+            android:name="com.bytedance.sdk.openadsdk.activity.TTFullScreenVideoActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:launchMode="standard"
+            android:roundIcon="@drawable/ces_show"
+            android:theme="@style/tt_full_screen_new" />
+        <activity
+            android:name="com.bytedance.sdk.openadsdk.activity.TTFullScreenExpressVideoActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:launchMode="standard"
+            android:roundIcon="@drawable/ces_show"
+            android:theme="@style/tt_full_screen_new" />
+        <activity
+            android:name="com.bytedance.sdk.openadsdk.activity.TTInterstitialActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:launchMode="standard"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@style/tt_full_screen_interaction" />
+        <activity
+            android:name="com.bytedance.sdk.openadsdk.activity.TTInterstitialExpressActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:launchMode="standard"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@style/tt_full_screen_interaction" />
+        <activity
+            android:name="com.bytedance.sdk.openadsdk.activity.TTAdActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:launchMode="standard"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@style/tt_full_screen_new" />
+        <activity
+            android:name="com.mbridge.msdk.activity.MBCommonActivity"
+            android:configChanges="keyboard|orientation"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@style/mbridge_transparent_common_activity_style" />
+        <!-- integration rewardVideo if aggregation nativeX pls add start -->
+
+        <activity
+            android:name="com.mbridge.msdk.out.LoadingActivity"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj" />
+        <!-- integration rewardVideo if aggregation nativeX pls add end -->
+        <activity
+            android:name="com.mbridge.msdk.newreward.player.MBRewardVideoActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity
+            android:name="com.mbridge.msdk.reward.player.MBRewardVideoActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <activity
+            android:name="sg.bigo.ads.ad.splash.AdSplashActivity"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:screenOrientation="portrait"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@android:style/Theme" />
+        <activity
+            android:name="sg.bigo.ads.ad.splash.LandscapeAdSplashActivity"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:screenOrientation="landscape"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@android:style/Theme" />
+
+
+        <activity
+            android:name="sg.bigo.ads.controller.form.AdFormActivity"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:windowSoftInputMode="adjustPan" />
+
+        <activity
+            android:name="com.thinkup.basead.ui.activity.TUMixSplashActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:launchMode="standard"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name="com.thinkup.expressad.reward.player.TURewardVideoActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|screenLayout"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:launchMode="standard"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
+            android:windowSoftInputMode="adjustPan" />
+
+
+        <provider
+            android:name="sg.bigo.ads.controller.provider.BigoAdsProvider"
+            android:authorities="${applicationId}.BigoAdsProvider"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:windowSoftInputMode="adjustPan" />
+
+
+        <activity
+            android:name="sg.bigo.ads.api.AdActivity"
+            android:configChanges="orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:screenOrientation="portrait"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar"
+            android:windowSoftInputMode="stateAlwaysHidden"></activity>
+        <activity
+            android:name="sg.bigo.ads.api.PopupAdActivity"
+            android:configChanges="orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:screenOrientation="portrait"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@style/TransparentDialog"
+            android:windowSoftInputMode="stateAlwaysHidden"></activity>
+
+        <activity
+            android:name="sg.bigo.ads.api.LandscapeAdActivity"
+            android:configChanges="orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:screenOrientation="landscape"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar"
+            android:windowSoftInputMode="stateAlwaysHidden"></activity>
+        <activity
+            android:name="sg.bigo.ads.api.CompanionAdActivity"
+            android:configChanges="orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:screenOrientation="portrait"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar"
+            android:windowSoftInputMode="stateAlwaysHidden"></activity>
+        <activity
+            android:name="sg.bigo.ads.api.LandscapeCompanionAdActivity"
+            android:configChanges="orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:screenOrientation="landscape"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar"
+            android:windowSoftInputMode="stateAlwaysHidden"></activity>
+        <activity
+            android:name="sg.bigo.ads.core.mraid.MraidVideoActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:screenOrientation="portrait"
+            android:taskAffinity="hjr.vv.ghj"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name="com.vungle.ads.internal.ui.VungleActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:hardwareAccelerated="true"
+            android:icon="@drawable/ces_show"
+            android:label="@string/str"
+            android:launchMode="singleTop"
+            android:noHistory="true"
+            android:roundIcon="@drawable/ces_show"
+            android:taskAffinity="hjr.vv.ghj"
+            android:windowSoftInputMode="adjustPan" />
+
+    </application>
+
+</manifest>

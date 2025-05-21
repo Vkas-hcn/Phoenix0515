@@ -41,5 +41,11 @@
             app:trackColor="@color/white"
             app:indicatorColor="#42DDC0"
             app:trackThickness="8dp" />
+        <LinearLayout
+            android:id="@+id/start_all"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

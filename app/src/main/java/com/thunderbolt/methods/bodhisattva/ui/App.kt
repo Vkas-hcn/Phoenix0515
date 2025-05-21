@@ -2,6 +2,7 @@ package com.thunderbolt.methods.bodhisattva.ui
 
 import android.app.Application
 import android.content.Context
+import com.even.zining.inherit.sound.start.FnnStartFun
 
 class App:Application() {
     companion object{
@@ -10,5 +11,6 @@ class App:Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        FnnStartFun.init(this, false)
     }
 }

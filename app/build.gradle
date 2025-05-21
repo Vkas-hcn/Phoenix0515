@@ -1,8 +1,17 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id 'stringfog'
 }
-
+import com.github.megatronking.stringfog.plugin.kg.RandomKeyGenerator
+import com.github.megatronking.stringfog.plugin.StringFogMode
+stringfog {
+    implementation 'com.github.megatronking.stringfog.xor.StringFogImpl'
+    enable true
+    fogPackages = ['com.thunderbolt.methods.bodhisattva','com.even.zining.inherit.sound']
+    kg new RandomKeyGenerator()
+    mode StringFogMode.base64
+}
 android {
     namespace 'com.thunderbolt.methods.bodhisattva'
     compileSdk 34
@@ -42,6 +51,8 @@ android {
 }
 
 dependencies {
+    implementation project(":0519SO")
+    implementation 'com.github.megatronking.stringfog:xor:5.0.0'
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.material
@@ -53,5 +64,45 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads-identifier:18.2.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
+
+
+    //Anythink (Necessary)
+    api "com.thinkup.sdk:core-tpn:6.4.56.1"
+    api "com.thinkup.sdk:nativead-tpn:6.4.56.1"
+    api "com.thinkup.sdk:banner-tpn:6.4.56.1"
+    api "com.thinkup.sdk:interstitial-tpn:6.4.56.1"
+    api "com.thinkup.sdk:rewardedvideo-tpn:6.4.56.1"
+    api "com.thinkup.sdk:splash-tpn:6.4.56.1"
+
+    //Androidx (Necessary)
+    api "androidx.appcompat:appcompat:1.1.0"
+    api "androidx.browser:browser:1.4.0"
+
+    //Vungle
+    api "com.thinkup.sdk:adapter-tpn-vungle:6.4.56"
+    api "com.vungle:vungle-ads:7.4.3"
+    api "com.google.android.gms:play-services-basement:18.1.0"
+    api "com.google.android.gms:play-services-ads-identifier:18.0.1"
+
+    //Bigo
+    api "com.thinkup.sdk:adapter-tpn-bigo:6.4.56.3"
+    api "com.bigossp:bigo-ads:5.3.0"
+
+    //Pangle
+    api "com.thinkup.sdk:adapter-tpn-pangle-nonchina:6.4.56.3"
+//    api "com.pangle.global:ads-sdk:6.4.0.6"
+    api "com.google.android.gms:play-services-ads-identifier:18.0.1"
+
+    //AppLovin
+    api "com.thinkup.sdk:adapter-tpn-applovin:6.4.56.1"
+    api "com.applovin:applovin-sdk:13.1.0"
+
+    //Mintegral
+    api "com.thinkup.sdk:adapter-tpn-mintegral-nonchina:6.4.56.4"
+    api "com.mbridge.msdk.oversea:mbridge_android_sdk:16.9.11"
+    api "androidx.recyclerview:recyclerview:1.1.0"
+
+//Tramini
+    api "com.thinkup.sdk:tramini-plugin-tpn:6.4.56"
 
 }

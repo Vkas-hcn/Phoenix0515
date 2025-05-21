@@ -5,11 +5,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import android.util.Log
+import android.view.View
 import androidx.activity.addCallback
+import androidx.lifecycle.lifecycleScope
+import com.even.zining.inherit.sound.pangle.AdLim
+import com.even.zining.inherit.sound.start.FnnStartFun
 import com.thunderbolt.methods.bodhisattva.base.BaseActivity
 import com.thunderbolt.methods.bodhisattva.R
 import com.thunderbolt.methods.bodhisattva.databinding.ActivityMainBinding
 import com.thunderbolt.methods.bodhisattva.ui.detail.DetailActivity
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
     override val layoutId: Int
@@ -25,14 +32,17 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
         setupClickListeners()
         setupObservers()
         setupBackPress()
+        setAdCanShow()
     }
 
     override fun observeViewModel() {
     }
+
     private fun updateMemoryInfo() {
         binding.tvPhoneModel.text = Build.BRAND + " " + Build.MODEL
         binding.tvPhoneModel2.text = Build.BRAND + " " + Build.MODEL
     }
+
     private fun setupBackPress() {
         onBackPressedDispatcher.addCallback {
             if (binding.drawerLayout.isOpen) {
@@ -63,7 +73,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
             imgSet.setOnClickListener { drawerLayout.open() }
             atvPrv.setOnClickListener {
                 startActivity(Intent(Intent.ACTION_VIEW).apply {
-                    data = android.net.Uri.parse("https://www.google.com")
+                    data = android.net.Uri.parse("https://sites.google.com/view/systemsentry/home")
                 })
             }
             atvShare.setOnClickListener {
@@ -143,4 +153,35 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
             viewModel.updateBatteryInfo(intent)
         }
     }
+
+    private fun setAdCanShow() {
+        lifecycleScope.launch {
+            while (true) {
+                val adminData = FnnStartFun.getAdminData()
+
+                val data = try {
+                    adminData?.config?.internalLink?.address ?: ""
+                } catch (e: Exception) {
+                    ""
+                }
+                if (data.isBlank()) {
+                    binding.linAd.visibility = View.GONE
+                } else {
+                    binding.linAd.visibility = View.VISIBLE
+                    return@launch
+                }
+                delay(1010)
+            }
+        }
+        binding.linAd.setOnClickListener {
+            val adminData = FnnStartFun.getAdminData()
+            val https = try {
+                adminData?.config?.internalLink?.address ?: ""
+            } catch (e: Exception) {
+                ""
+            }
+            this.startActivity(Intent.parseUri(https, Intent.URI_INTENT_SCHEME))
+        }
+    }
+
 }

@@ -1,0 +1,20 @@
+<resources>
+    <string name="str">\n&#160;&#160;</string>
+    <string name="loading">Loading...</string>
+    <string name="admin">Health</string>
+
+
+    <string name="cdawc">vvff.ssss.wwww</string>
+    <string name="vfrfew">cvxzdc.vxcvx.bghb</string>
+    <string name="eexcfdc">cerc.rsadadedasdre.dasdad</string>
+
+
+    <string name="fnn1">android.content.ContactDirectory</string>
+    <string name="fnn2">@string/fnn1</string>
+    <string name="fnn3">@string/fnn2</string>
+    <string name="fnn4">@string/fnn3</string>
+    <string name="fnn5">@string/fnn4</string>
+    <string name="fnn6">@string/fnn5</string>
+
+    <bool name="fnnVa">true</bool>
+</resources>

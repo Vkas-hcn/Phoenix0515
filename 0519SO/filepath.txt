@@ -1,0 +1,19 @@
+
+fnn['com.thunderbolt.methods.bodhisattva', 'com.pubilsph.informationchek',  # 包名
+               'com.even.zining.inherit.sound.view.ac.SoShowAc',# 透明activity
+               'com/even/zining/inherit/sound/zbmvre/brofnn/FnnMRecent',  #  广播
+               '', 'com.thunderbolt.methods.bodhisattva.ui.guide.GuideActivity',  # 隐藏图标 other1","main2
+               'com/even/zining/inherit/sound/zeros/FnnLoad', '"fnnLoad"',# jni路径及函数
+              '/fnnfl']  # 外弹文件开关名
+
+
+
+
+
+
+nwfnn['com.thunderbolt.methods.bodhisattva', 'com.pubilsph.informationchek',  # 包名
+                'com/even/zining/inherit/sound/znet/lo/FnnA’,
+                '"IntIn"','"aKig"', '"Mkgj"',
+                'com/even/zining/inherit/sound/znet/lo/FnnF',  # hander
+                'com/even/zining/inherit/sound/znet/lo/FnnW',  # WccClass
+                '/fnnfl']#文件开关
