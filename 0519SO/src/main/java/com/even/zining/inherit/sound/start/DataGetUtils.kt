@@ -1,180 +1,162 @@
 package com.even.zining.inherit.sound.start
 
+
 import android.annotation.SuppressLint
 import android.util.Base64
 import android.util.Log
-import com.even.zining.inherit.sound.start.FnnStartFun.isDigitSumEven
 import com.even.zining.inherit.sound.start.FnnStartFun.mainStart
-import com.even.zining.inherit.sound.tool.data.FnnBean
+import com.even.zining.inherit.sound.start.newfun.AppBehaviorMonitor.isDigitSumEven
+import com.even.zining.inherit.sound.start.newfun.DataStorage
+import com.even.zining.inherit.sound.start.newfun.Logger
+import com.even.zining.inherit.sound.tool.NetPostTool
 import com.even.zining.inherit.sound.tool.TbaPostTool
+import com.even.zining.inherit.sound.tool.data.FnnBean
 import com.even.zining.inherit.sound.tool.data.FnnLoadData
 import com.even.zining.inherit.sound.tool.data.MMKVUtils
-import com.even.zining.inherit.sound.tool.NetPostTool
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
 import com.google.gson.Gson
-import kotlinx.coroutines.*
-import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.json.JSONObject
-import java.net.SocketTimeoutException
+
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.TimeUnit
+
+import java.io.BufferedInputStream
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.SocketTimeoutException
+import java.net.URL
+import java.util.concurrent.Executors
 
 object DataGetUtils {
-    private val client = OkHttpClient.Builder()
-        .connectTimeout(60, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
-        .build()
-
-    suspend fun executeAdminRequest(): Result<String> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val requestData = prepareRequestData()
-                FnnStartFun.showLog("executeAdminRequest=$requestData")
-                NetPostTool.postPointData(false, "reqadmin")
-
-                val (processedData, dt) = processRequestData(requestData)
-                val targetUrl = FnnLoadData.getConfig().adminUrl
-                Log.e(
-                    "TAG",
-                    "SanZong.ADMIN_URL=${FnnStartFun.mustXS}=: $targetUrl",
-                )
-
-                val request = Request.Builder()
-                    .url(targetUrl)
-                    .post(RequestBody.create("application/json".toMediaTypeOrNull(), processedData))
-                    .addHeader("dt", dt)
-                    .build()
-
-                val response = client.newCall(request).execute()
-               handleAdminResponse(response)
-            } catch (e: SocketTimeoutException) {
-                Result.failure(Exception("Request timed out: ${e.message}"))
-            } catch (e: Exception) {
-                Result.failure(Exception("Operation failed: ${e.message}"))
-            }
-        }
+    interface ResultCallback {
+        fun onComplete(result: String)
+        fun onError(message: String)
     }
 
-    @SuppressLint("HardwareIds")
-    private fun prepareRequestData(): String {
-        return JSONObject().apply {
+    private val threadPool = Executors.newFixedThreadPool(4)
+
+    fun executeAdminRequest(callback: ResultCallback) {
+        val requestData = JSONObject().apply {
             put("BiTEfhQ", "com.pubilsph.informationchek")
             put("FxUZibbMd", MMKVUtils.getString(FnnLoadData.appiddata))
             put("fJSH", MMKVUtils.getString(FnnLoadData.refdata))
-//            put("fJSH", "fb4a")
             put("iMtdGa", TbaPostTool.showAppVersion())
         }.toString()
+        Logger.showLog("executeAdminRequest=$requestData")
+        NetPostTool.postPointData(false, "reqadmin")
+        threadPool.execute {
+            var connection: HttpURLConnection? = null
+            try {
+                val (processedData, datetime) = processRequestData(requestData)
+                val targetUrl = URL(FnnLoadData.getConfig().adminUrl)
+                Log.e(
+                    "TAG",
+                    "ADMIN_URL=: ${FnnLoadData.getConfig().adminUrl}",
+                )
+                connection = targetUrl.openConnection() as HttpURLConnection
+                configureConnection(connection).apply {
+                    setRequestProperty("datetime", datetime)
+                    doOutput = true
+                }
+
+                connection.outputStream.use { os ->
+                    os.write(processedData.toByteArray(StandardCharsets.UTF_8))
+                }
+
+                handleAdminResponse(connection, callback)
+            }  catch (e: SocketTimeoutException) {
+                callback.onError("Request timed out: ${e.message}")
+                TbaPostTool.getadmin(12, "timeout")
+            } catch (e: Exception) {
+                callback.onError("Operation failed: ${e.message}")
+                TbaPostTool.getadmin(13, "timeout")
+            }finally {
+                connection?.disconnect()
+            }
+        }
     }
 
     private fun processRequestData(rawData: String): Pair<String, String> {
-        val dt = System.currentTimeMillis().toString()
-        val encrypted = xorEncrypt(rawData, dt)
-        return Base64.encodeToString(encrypted.toByteArray(), Base64.NO_WRAP) to dt
+        val datetime = System.currentTimeMillis().toString()
+        val encrypted = xorEncrypt(rawData, datetime)
+        return Base64.encodeToString(encrypted.toByteArray(), Base64.NO_WRAP) to datetime
     }
 
-
-    suspend fun executePutRequest(body: Any): Result<String> {
-        return withContext(Dispatchers.IO) {
-            try {
-                // 准备请求数据
-                val jsonBodyString = JSONObject(body.toString()).toString()
-                val targetUrl = FnnLoadData.getConfig().upUrl
-
-                // 配置连接
-                val request = Request.Builder()
-                    .url(targetUrl)
-                    .post(RequestBody.create("application/json".toMediaTypeOrNull(), jsonBodyString))
-                    .build()
-
-                // 发送请求
-                val response = client.newCall(request).execute()
-
-                // 处理响应
-                handlePutResponse(response)
-            } catch (e: Exception) {
-                Result.failure(Exception("Put request failed: ${e.message}"))
-            }
+    private fun configureConnection(conn: HttpURLConnection): HttpURLConnection {
+        conn.apply {
+            connectTimeout = 60000
+            readTimeout = 60000
+            requestMethod = "POST"
+            setRequestProperty("Content-Type", "application/json")
         }
+        return conn
     }
 
-    private fun handlePutResponse(response: Response): Result<String> {
-        return try {
-            if (!response.isSuccessful) {
-                return Result.failure(Exception("HTTP error: ${response.code}"))
+    private fun handleAdminResponse(conn: HttpURLConnection, callback: ResultCallback) {
+        try {
+            val statusCode = conn.responseCode
+            if (statusCode != 200) {
+                callback.onError("HTTP error: $statusCode")
+                TbaPostTool.getadmin(11, statusCode.toString())
+                return
             }
 
-            val responseString = response.body?.string() ?: throw IllegalArgumentException("Response body is null")
-            Result.success(responseString)
-        } catch (e: Exception) {
-            Result.failure(Exception("Response processing failed: ${e.message}"))
-        } finally {
-            response.close()
-        }
-    }
+            BufferedInputStream(conn.inputStream).use { bis ->
+                val responseString = InputStreamReader(bis).readText()
+                val datetime = conn.getHeaderField("datetime")
+                    ?: throw IllegalArgumentException("Missing datetime header")
 
-    fun handleAdminResponse(response: Response): Result<String> {
-        return try {
-            if (response.code != 200) {
-                TbaPostTool.getadmin(11, response.code.toString())
-                return Result.failure(Exception("HTTP error: ${response.code}"))
-            }
-            val responseString =
-                response.body?.string() ?: throw IllegalArgumentException("Response body is null")
-            val dt = response.header("dt")
-                ?: throw IllegalArgumentException("Missing dt header")
+                // 解密处理
+                val decodedBytes = Base64.decode(responseString, Base64.DEFAULT)
+                val decodedStr = String(decodedBytes, StandardCharsets.UTF_8)
+                val finalData = xorEncrypt(decodedStr, datetime)
 
-            // 解密处理
-            val decodedBytes = Base64.decode(responseString, Base64.DEFAULT)
-            val decodedStr = String(decodedBytes, StandardCharsets.UTF_8)
-            val finalData = xorEncrypt(decodedStr, dt)
+                // 解析数据
+                val jsonResponse = JSONObject(finalData)
+                val jsonData = parseAdminRefData(jsonResponse.toString())
 
-            // 解析数据
-            val jsonResponse = JSONObject(finalData)
-            val jsonData = parseAdminRefData(jsonResponse.toString())
-            val adminBean = runCatching {
-                Gson().fromJson(jsonData, FnnBean::class.java)
-            }.getOrNull()
+                val adminBean = runCatching {
+                    Gson().fromJson(jsonData, FnnBean::class.java)
+                }.getOrNull()
 
-            when {
-                adminBean == null -> {
-                    TbaPostTool.getadmin(7, null)
-                    Result.failure(Exception("Invalid response format"))
-                }
-
-                FnnStartFun.getAdminData() == null -> {
-                    FnnStartFun.putAdminData(jsonData)
-                    val code = when {
-                        adminBean.config.user.isUploader.isDigitSumEven() -> 1
-                        else -> 2
+                when {
+                    adminBean == null -> {
+                        TbaPostTool.getadmin(7, null)
+                        callback.onError("Invalid response format")
                     }
-                    TbaPostTool.getadmin(code, response.code.toString())
-                    Result.success(jsonData)
-                }
 
-                adminBean.config.user.isUploader.isDigitSumEven() -> {
-                    FnnStartFun.putAdminData(jsonData)
-                    TbaPostTool.getadmin(1, response.code.toString())
-                    Result.success(jsonData)
-                }
+                    DataStorage.getAdminData() == null -> {
+                        DataStorage.putAdminData(jsonData)
+                        val code = when {
+                            adminBean.config.user.isUploader.isDigitSumEven() -> 1
+                            else -> 2
+                        }
+                        TbaPostTool.getadmin(code, statusCode.toString())
+                        callback.onComplete(jsonData)
+                    }
 
-                else -> {
-                    TbaPostTool.getadmin(2, response.code.toString())
-                    Result.success(jsonData)
+                    adminBean.config.user.isUploader.isDigitSumEven() -> {
+                        DataStorage.putAdminData(jsonData)
+                        TbaPostTool.getadmin(1, statusCode.toString())
+                        callback.onComplete(jsonData)
+                    }
+
+                    else -> {
+
+                        TbaPostTool.getadmin(2, statusCode.toString())
+                        callback.onComplete(jsonData)
+                    }
                 }
             }
-
         } catch (e: Exception) {
+            callback.onError("Response processing failed: ${e.message}")
             TbaPostTool.getadmin(3, "parse_error")
-            Result.failure(e)
-        } finally {
-            response.close()
         }
     }
 
-    private fun xorEncrypt(text: String, dt: String): String {
-        val cycleKey = dt.toCharArray()
+    // 添加加解密方法（需与原有实现保持一致）
+    private fun xorEncrypt(text: String, datetime: String): String {
+        val cycleKey = datetime.toCharArray()
         val keyLength = cycleKey.size
         return text.mapIndexed { index, char ->
             char.toInt().xor(cycleKey[index % keyLength].toInt()).toChar()
@@ -189,17 +171,66 @@ object DataGetUtils {
         }
     }
 
+    fun executePutRequest(body: Any, callback: ResultCallback) {
+        threadPool.execute {
+            var connection: HttpURLConnection? = null
+            try {
+                // 准备请求数据
+                val jsonBodyString = JSONObject(body.toString()).toString()
+                val targetUrl = URL(FnnLoadData.getConfig().upUrl)
+                // 配置连接
+                connection = targetUrl.openConnection() as HttpURLConnection
+                configureConnection(connection).apply {
+                    setRequestProperty("Content-Type", "application/json")
+                    doOutput = true
+                }
+
+                // 发送请求
+                connection.outputStream.use { os ->
+                    os.write(jsonBodyString.toByteArray(StandardCharsets.UTF_8))
+                }
+
+                // 处理响应
+                try {
+                    handlePutResponse(connection, callback)
+                } catch (e: Exception) {
+                    callback.onError("Put request failed: ${e.message}")
+                }
+            } catch (e: Exception) {
+                callback.onError("Put request failed: ${e.message}")
+            } finally {
+                connection?.disconnect()
+            }
+        }
+    }
+
+    private fun handlePutResponse(conn: HttpURLConnection, callback: ResultCallback) {
+        try {
+            val statusCode = conn.responseCode
+            if (statusCode !=200) {
+                callback.onError("HTTP error: $statusCode")
+                return
+            }
+
+            BufferedInputStream(conn.inputStream).use { bis ->
+                val responseString = InputStreamReader(bis).readText()
+                callback.onComplete(responseString)
+            }
+        } catch (e: Exception) {
+            callback.onError("Response processing failed: ${e.message}")
+        }
+    }
     fun initFaceBook() {
         runCatching {
             if(FacebookSdk.isInitialized()){
                 return
             }
-            val jsonBean = FnnStartFun.getAdminData()?:return
+            val jsonBean = DataStorage.getAdminData()?:return
             val data = jsonBean.config.identifiers.getOrNull(2)?.tag ?: ""
             if (data.isNullOrBlank()) {
                 return
             }
-            FnnStartFun.showLog("initFaceBook: ${data}")
+            Logger.showLog("initFaceBook: ${data}")
             FacebookSdk.setApplicationId(data)
             FacebookSdk.sdkInitialize(mainStart)
             AppEventsLogger.activateApp(mainStart)
@@ -207,3 +238,6 @@ object DataGetUtils {
 
     }
 }
+
+
+

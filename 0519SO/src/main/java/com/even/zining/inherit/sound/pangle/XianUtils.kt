@@ -2,6 +2,8 @@ package com.even.zining.inherit.sound.pangle
 
 
 import com.even.zining.inherit.sound.start.FnnStartFun
+import com.even.zining.inherit.sound.start.newfun.DataStorage
+import com.even.zining.inherit.sound.start.newfun.Logger
 import com.even.zining.inherit.sound.tool.TbaPostTool
 import com.even.zining.inherit.sound.tool.data.FnnLoadData
 import com.even.zining.inherit.sound.tool.data.MMKVUtils
@@ -13,6 +15,17 @@ object XianUtils {
     private var MAX_HOURLY_SHOWS = 0
     private var MAX_DAILY_SHOWS = 0
     private var MAX_CLICKS = 0
+
+    fun canShowAdFun(isPostInt:Boolean): Boolean {
+        val jsonBean = DataStorage.getAdminData() ?: return true
+        val maxHourlyShows = jsonBean.config.adLimits.getOrNull(0)?:0
+        val maxDailyShows = jsonBean.config.adLimits.getOrNull(1)?:0
+        val maxClicks = jsonBean.config.adLimits.getOrNull(2)?:0
+        init(maxHourlyShows, maxDailyShows,maxClicks)
+        return canShowAd(isPostInt)
+    }
+
+
 
     fun init(maxHourlyShows: Int, maxDailyShows: Int, maxClicks: Int) {
         MAX_HOURLY_SHOWS = maxHourlyShows
@@ -52,7 +65,7 @@ object XianUtils {
 
     // 记录广告展示
     fun recordAdShown() {
-        FnnStartFun.showLog("记录插屏广告展示")
+        Logger.showLog("记录插屏广告展示")
         // 更新小时计数
         updateHourCount()
         // 更新每日展示计数
@@ -60,7 +73,7 @@ object XianUtils {
     }
 
     fun recordAdClick() {
-        FnnStartFun.showLog("记录插屏广告点击")
+        Logger.showLog("记录插屏广告点击")
         // 更新点击计数
         updateClickCount()
     }
@@ -74,10 +87,10 @@ object XianUtils {
             MMKVUtils.put(FnnLoadData.adHourShowDate, currentHour)
             MMKVUtils.put(FnnLoadData.adHourShowNum, 0)
 
-            FnnStartFun.showLog("插屏-小时展示数重置")
+            Logger.showLog("插屏-小时展示数重置")
             return true
         }
-        FnnStartFun.showLog("插屏-小时展示数=$hourCount ----小时最大展示数=${MAX_HOURLY_SHOWS}")
+        Logger.showLog("插屏-小时展示数=$hourCount ----小时最大展示数=${MAX_HOURLY_SHOWS}")
         return hourCount < MAX_HOURLY_SHOWS
     }
 
@@ -92,16 +105,16 @@ object XianUtils {
             MMKVUtils.put(FnnLoadData.adDayShowNum, 0)
             MMKVUtils.put(FnnLoadData.adClickNum, 0)
             MMKVUtils.put(FnnLoadData.getlimit, false)
-            FnnStartFun.showLog("插屏-天展示数重置")
+            Logger.showLog("插屏-天展示数重置")
             return true
         }
-        FnnStartFun.showLog("插屏-天展示数=$dailyCount ----天最大展示数=${MAX_DAILY_SHOWS}")
+        Logger.showLog("插屏-天展示数=$dailyCount ----天最大展示数=${MAX_DAILY_SHOWS}")
         return dailyCount < MAX_DAILY_SHOWS
     }
 
     private fun checkClickLimit(): Boolean {
         val clickCount = MMKVUtils.getInt(FnnLoadData.adClickNum)
-        FnnStartFun.showLog("插屏-点击数=$clickCount ----点击最大展示数=${MAX_CLICKS}")
+        Logger.showLog("插屏-点击数=$clickCount ----点击最大展示数=${MAX_CLICKS}")
         return clickCount < MAX_CLICKS
     }
 

@@ -11,12 +11,13 @@ import androidx.core.app.NotificationCompat
 import android.widget.RemoteViews
 import com.even.zining.inherit.sound.R
 import com.even.zining.inherit.sound.start.FnnStartFun
+import com.even.zining.inherit.sound.start.newfun.Logger
 import com.even.zining.inherit.sound.tool.PngCanGo.KEY_IS_SERVICE
 
 class FnnFService : Service() {
     @SuppressLint("ForegroundServiceType", "RemoteViewLayout")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        FnnStartFun.showLog("FebFiveFffService onStartCommand-1=${KEY_IS_SERVICE}")
+        Logger.showLog("FebFiveFffService onStartCommand-1=${KEY_IS_SERVICE}")
         if (!KEY_IS_SERVICE) {
             KEY_IS_SERVICE = true
             val channel =
@@ -40,7 +41,7 @@ class FnnFService : Service() {
                         .build()
                 )
             }
-            FnnStartFun.showLog("FebFiveFffService onStartCommand-2=${KEY_IS_SERVICE}")
+            Logger.showLog("FebFiveFffService onStartCommand-2=${KEY_IS_SERVICE}")
         }
         return super.onStartCommand(intent, flags, startId)
     }

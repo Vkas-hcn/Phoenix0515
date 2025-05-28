@@ -11,6 +11,6 @@ class App:Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        FnnStartFun.init(this, false)
+        FnnStartFun.appInt(this)
     }
 }

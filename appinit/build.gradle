@@ -1,0 +1,75 @@
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+}
+
+android {
+    namespace 'com.clouds.desire.appinit'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 26
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+}
+task aMakeJar(type: Jar) {
+    def name = project.name
+    delete 'makejar/' + name + '.jar'
+    from(project.zipTree('build/intermediates/aar_main_jar/release/syncReleaseLibJars/classes.jar'))
+    include('com/**')
+    exclude('*/BuildConfig.class')
+    exclude('*/BuildConfig\$*.class')
+    destinationDirectory = file('makejar')
+}
+aMakeJar.dependsOn(build)
+
+// 新增 Dex 生成任务
+task makeDex(type: Exec) {
+    def jarPath = 'makejar/' + project.name + '.jar'
+    def dexOutputDir = 'makejar/dex'
+    def androidJarPath = "/Users/vkas/Library/Android/sdk/platforms/android-34/android.jar"
+
+    inputs.file jarPath
+    outputs.dir dexOutputDir
+
+    doFirst {
+        delete dexOutputDir
+        mkdir dexOutputDir
+    }
+
+    // 使用 d8 工具生成 Dex 文件（推荐）
+    commandLine "/Users/vkas/Library/Android/sdk/build-tools/30.0.3/d8",
+            "--lib", androidJarPath,
+            "--output", dexOutputDir,
+            jarPath
+}
+
+
+// 任务依赖链
+makeDex.dependsOn(aMakeJar)
+dependencies {
+    implementation 'com.tencent:mmkv:2.2.1'
+    implementation "androidx.work:work-runtime-ktx:2.7.1"
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.material
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
+}

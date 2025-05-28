@@ -39,7 +39,7 @@ class Guide2Activity : BaseActivity<ActivityGuideBinding, BaseViewModel>() {
     fun jumpMain() {
         Log.e("TAG", "jumpMain: ", )
         startActivity(Intent(this@Guide2Activity, MainActivity::class.java))
-//        finish()
+        finish()
     }
 
 

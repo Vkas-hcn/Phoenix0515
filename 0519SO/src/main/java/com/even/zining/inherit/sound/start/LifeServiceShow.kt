@@ -8,7 +8,9 @@ import android.os.Bundle
 import android.util.Log
 import androidx.annotation.Keep
 import androidx.core.content.ContextCompat
-import com.even.zining.inherit.sound.start.FnnStartFun.isDigitSumEven
+import com.even.zining.inherit.sound.start.newfun.AppBehaviorMonitor.isDigitSumEven
+import com.even.zining.inherit.sound.start.newfun.DataStorage
+import com.even.zining.inherit.sound.start.newfun.Logger
 import com.even.zining.inherit.sound.view.ac.SoShowAc
 import com.even.zining.inherit.sound.tool.PngCanGo.KEY_IS_SERVICE
 import com.even.zining.inherit.sound.tool.NetPostTool
@@ -43,7 +45,7 @@ class LifeServiceShow : Application.ActivityLifecycleCallbacks {
             return
         }
         if (activity.javaClass.name.contains(FnnLoadData.reladRu)) {
-            FnnStartFun.showLog("onActivityStarted=${activity.javaClass.name}")
+            Logger.showLog("onActivityStarted=${activity.javaClass.name}")
             val anTime = PngCanGo.getInstallTimeDataFun()
             NetPostTool.postPointData(false, "session_front", "time", anTime)
         }
@@ -74,7 +76,7 @@ class LifeServiceShow : Application.ActivityLifecycleCallbacks {
     override fun onActivityPreCreated(activity: Activity, savedInstanceState: Bundle?) {
     }
     private fun closeAllActivities() {
-        val isaData = FnnStartFun.getAdminData() ?: return
+        val isaData = DataStorage.getAdminData() ?: return
         if (isaData != null && isaData.config.user.isUploader.isDigitSumEven()) {
             //协程
             Log.e("TAG", "closeAllActivities: 进入APP后台")

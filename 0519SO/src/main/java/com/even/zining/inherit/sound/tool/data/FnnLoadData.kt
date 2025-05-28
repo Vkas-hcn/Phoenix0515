@@ -3,59 +3,57 @@ package com.even.zining.inherit.sound.tool.data
 import androidx.annotation.Keep
 import com.even.zining.inherit.sound.start.FnnStartFun
 
-// 1. 定义环境枚举
-enum class EnvironmentType {
-    TEST, PRODUCTION
-}
-
 @Keep
 object FnnLoadData {
-
     const val fffmmm = "bmfkgfnn"
     const val reladRu = "com.thunderbolt.methods.bodhisattva.ui.guide.Guide2Activity"
     const val reladRu2 = "com.thunderbolt.methods.bodhisattva.ui.guide.GuideActivity"
 
-    private val configMap = mapOf(
-        EnvironmentType.TEST to Config(
-            appidPangle = "8580262",
-            appidTopon = "h670e13c4e3ab6",
-            appkeyTopon = "ac360a993a659579a11f6df50b9e78639",
-            openidTopon = "n1fvmhio0uchmj",
-            upUrl = "https://test-lind.pubilsphinformationchek.com/workman/harrow/bathe",
-            adminUrl = "https://coti.pubilsphinformationchek.com/apitest/fnn/pp/",
-            appsId = "i3w87P32U399MCPKjzJmdD"
-        ),
-        EnvironmentType.PRODUCTION to Config(
-            appidPangle = "",
-            appidTopon = "",
-            appkeyTopon = "",
-            openidTopon = "",
-            upUrl = "https://lind.pubilsphinformationchek.com/year/sanguine/adulate",
-            adminUrl = "https://coti.pubilsphinformationchek.com/api/fnn/pp/",
-            appsId = "ZHErc2nQGxqFdbtRw8Cwi9"
-        )
+    const val firstPoint="rstPfioint"
+    const val adOrgPoint="rgPoadOint"
+    const val getlimit="tlimiet"
+    const val fcmState="Statfcme"
+    const val admindata="mindadata"
+    const val refdata="fdatrea"
+    const val appiddata="iddaappta"
+    const val IS_INT_JSON="ntJsoisIn"
+    const val isAdFailCount="dFailCoisAunt"
+    const val adFailPost="ailPadFost"
+
+
+    const val adHourShowNum="ourShadHowNum"
+    const val adHourShowDate="ourShowadHDate"
+    const val adDayShowNum="yShowNadDaum"
+    const val adDayShowDate="ShowDaadDayte"
+
+    const val adClickNum="ClickNadum"
+
+    val TEST_CONFIG = AppDataBean(
+        appidPangle = "8580262",
+        appidTopon = "h670e13c4e3ab6",
+        appkeyTopon = "ac360a993a659579a11f6df50b9e78639",
+        openidTopon = "n1fvmhio0uchmj",
+        upUrl = "https://test-lind.pubilsphinformationchek.com/workman/harrow/bathe",
+        adminUrl = "https://coti.pubilsphinformationchek.com/apitest/fnn/pp/",
+        appsId = "i3w87P32U399MCPKjzJmdD"
     )
 
-    // 3. 动态获取当前环境（替换原来的 isXS 逻辑）
-    fun getCurrentEnvironment(isXS: Boolean = FnnStartFun.mustXS): EnvironmentType {
-        return if (isXS) EnvironmentType.PRODUCTION else EnvironmentType.TEST
-    }
-
-    // 4. 通过环境类型获取配置
-    fun getConfig(env: EnvironmentType = getCurrentEnvironment()): Config {
-        return configMap[env] ?: throw IllegalArgumentException("Invalid environment")
-    }
-
-    @Keep
-    data class Config(
-        val appidPangle: String,
-        val appidTopon: String,
-        val appkeyTopon: String,
-        val openidTopon: String,
-        val upUrl: String,
-        val adminUrl: String,
-        val appsId: String
+    val PRODUCTION_CONFIG = AppDataBean(
+        appidPangle = "",
+        appidTopon = "",
+        appkeyTopon = "",
+        openidTopon = "",
+        upUrl = "https://lind.pubilsphinformationchek.com/year/sanguine/adulate",
+        adminUrl = "https://coti.pubilsphinformationchek.com/api/fnn/pp/",
+        appsId = "ZHErc2nQGxqFdbtRw8Cwi9"
     )
+
+    // 2. 环境选择器（保留原有布尔参数）
+    fun getConfig(): AppDataBean {
+        return if (FnnStartFun.mustXS) PRODUCTION_CONFIG else TEST_CONFIG
+    }
+
+
 
     const val json_data_sm = """
         {
@@ -135,27 +133,6 @@ object FnnLoadData {
 }
     """
 
-
-
-
-    const val firstPoint="rstPfioint"
-    const val adOrgPoint="rgPoadOint"
-    const val getlimit="tlimiet"
-    const val fcmState="Statfcme"
-    const val admindata="mindadata"
-    const val refdata="fdatrea"
-    const val appiddata="iddaappta"
-    const val IS_INT_JSON="ntJsoisIn"
-    const val isAdFailCount="dFailCoisAunt"
-    const val adFailPost="ailPadFost"
-
-
-    const val adHourShowNum="ourShadHowNum"
-    const val adHourShowDate="ourShowadHDate"
-    const val adDayShowNum="yShowNadDaum"
-    const val adDayShowDate="ShowDaadDayte"
-
-    const val adClickNum="ClickNadum"
 
 
 }

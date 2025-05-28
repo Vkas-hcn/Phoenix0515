@@ -10,12 +10,16 @@ import com.appsflyer.AdRevenueScheme
 import com.appsflyer.AppsFlyerLib
 import com.appsflyer.MediationNetwork
 import com.bytedance.sdk.openadsdk.api.interstitial.PAGInterstitialAd
+import com.even.zining.inherit.sound.start.DataGetUtils
 import com.even.zining.inherit.sound.start.FnnStartFun.mainStart
 import org.json.JSONObject
 import java.util.UUID
 import com.even.zining.inherit.sound.start.FnnStartFun
+import com.even.zining.inherit.sound.start.newfun.DataStorage
+import com.even.zining.inherit.sound.start.newfun.Logger
 import com.even.zining.inherit.sound.tool.data.FnnLoadData
 import com.even.zining.inherit.sound.tool.data.MMKVUtils
+import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
@@ -244,19 +248,22 @@ object TbaPostTool {
         additionalParameters[AdRevenueScheme.AD_TYPE] = "Interstitial"
         AppsFlyerLib.getInstance().logAdRevenue(adRevenueData, additionalParameters)
         logAdImpressionRevenue(ecmVVVV.toString())
-        val jsonBean = FnnStartFun.getAdminData()
+        val jsonBean = DataStorage.getAdminData()
         val fbId = jsonBean?.config?.identifiers?.getOrNull(2)?.tag ?: ""
         if (fbId.isBlank()) {
             return
         }
         if (fbId.isNotEmpty()) {
+            if (!FacebookSdk.isInitialized()) {
+                DataGetUtils.initFaceBook()
+            }
             try {
                 AppEventsLogger.newLogger(mainStart).logPurchase(
                     BigDecimal(ecmVVVV.toString()),
                     Currency.getInstance("USD")
                 )
             } catch (e: Exception) {
-                FnnStartFun.showLog("Invalid ecpmPrecision value: ${ecmVVVV}, skipping logPurchase")
+                Logger.showLog("Invalid ecpmPrecision value: ${ecmVVVV}, skipping logPurchase")
             }
         }
     }
@@ -265,7 +272,7 @@ object TbaPostTool {
         val ecmVVVV = try {
             adValue.publisherRevenue
         } catch (e: NumberFormatException) {
-            FnnStartFun.showLog("Invalid ecpmPrecision value: ${adValue.ecpmPrecision}, using default value 0.0")
+            Logger.showLog("Invalid ecpmPrecision value: ${adValue.ecpmPrecision}, using default value 0.0")
             0.0
         }
         val adRevenueData = AFAdRevenueData(
@@ -279,19 +286,22 @@ object TbaPostTool {
         additionalParameters[AdRevenueScheme.AD_TYPE] = "Interstitial"
         AppsFlyerLib.getInstance().logAdRevenue(adRevenueData, additionalParameters)
         logAdImpressionRevenue(ecmVVVV.toString())
-        val jsonBean = FnnStartFun.getAdminData()
+        val jsonBean = DataStorage.getAdminData()
         val fbId = jsonBean?.config?.identifiers?.getOrNull(2)?.tag ?: ""
         if (fbId.isBlank()) {
             return
         }
         if (fbId.isNotEmpty()) {
+            if (!FacebookSdk.isInitialized()) {
+                DataGetUtils.initFaceBook()
+            }
             try {
                 AppEventsLogger.newLogger(mainStart).logPurchase(
                     BigDecimal(ecmVVVV.toString()),
                     Currency.getInstance("USD")
                 )
             } catch (e: Exception) {
-                FnnStartFun.showLog("Invalid ecpmPrecision value: ${adValue.ecpmPrecision}, skipping logPurchase")
+                Logger.showLog("Invalid ecpmPrecision value: ${adValue.ecpmPrecision}, skipping logPurchase")
             }
         }
     }

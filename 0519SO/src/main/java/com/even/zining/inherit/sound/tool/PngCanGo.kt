@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import com.even.zining.inherit.sound.start.FnnStartFun
 import com.even.zining.inherit.sound.zbmvre.fnnserv.FnnFService
 import com.even.zining.inherit.sound.start.FnnStartFun.mainStart
+import com.even.zining.inherit.sound.start.newfun.Logger
 import java.util.ArrayList
 import kotlinx.coroutines.*
 
@@ -65,9 +66,9 @@ object PngCanGo {
         stopService()
         serviceJob = coroutineScope.launch {
             while (isActive) {
-                FnnStartFun.showLog("startService---1-----$KEY_IS_SERVICE")
+                Logger.showLog("startService---1-----$KEY_IS_SERVICE")
                 if (!KEY_IS_SERVICE && Build.VERSION.SDK_INT < 31) {
-                    FnnStartFun.showLog("startService---2-----$KEY_IS_SERVICE")
+                    Logger.showLog("startService---2-----$KEY_IS_SERVICE")
                    try {
                        ContextCompat.startForegroundService(
                            mainStart,
@@ -77,7 +78,7 @@ object PngCanGo {
                    }
 
                 } else {
-                    FnnStartFun.showLog("startService---3-----$KEY_IS_SERVICE")
+                    Logger.showLog("startService---3-----$KEY_IS_SERVICE")
                     stopService()
                     break
                 }

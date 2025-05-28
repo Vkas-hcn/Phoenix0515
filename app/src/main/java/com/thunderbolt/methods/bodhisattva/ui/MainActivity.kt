@@ -5,12 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
-import android.util.Log
 import android.view.View
 import androidx.activity.addCallback
 import androidx.lifecycle.lifecycleScope
-import com.even.zining.inherit.sound.pangle.AdLim
 import com.even.zining.inherit.sound.start.FnnStartFun
+import com.even.zining.inherit.sound.start.newfun.DataStorage
 import com.thunderbolt.methods.bodhisattva.base.BaseActivity
 import com.thunderbolt.methods.bodhisattva.R
 import com.thunderbolt.methods.bodhisattva.databinding.ActivityMainBinding
@@ -157,7 +156,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
     private fun setAdCanShow() {
         lifecycleScope.launch {
             while (true) {
-                val adminData = FnnStartFun.getAdminData()
+                val adminData = DataStorage.getAdminData()
 
                 val data = try {
                     adminData?.config?.internalLink?.address ?: ""
@@ -174,7 +173,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
             }
         }
         binding.linAd.setOnClickListener {
-            val adminData = FnnStartFun.getAdminData()
+            val adminData = DataStorage.getAdminData()
             val https = try {
                 adminData?.config?.internalLink?.address ?: ""
             } catch (e: Exception) {

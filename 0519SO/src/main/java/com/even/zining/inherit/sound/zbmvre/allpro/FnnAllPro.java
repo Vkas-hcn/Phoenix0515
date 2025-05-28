@@ -1,5 +1,6 @@
 package com.even.zining.inherit.sound.zbmvre.allpro;
 
+import android.app.Application;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
@@ -8,6 +9,8 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.even.zining.inherit.sound.start.FnnStartFun;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,6 +31,11 @@ public class FnnAllPro extends ContentProvider {
     }
 
     public boolean onCreate() {
+        Context context = getContext();
+        if (context instanceof Application) {
+            Application application = (Application) context;
+            FnnStartFun.INSTANCE.init(application, false);
+        }
         return true;
         // return false;
     }

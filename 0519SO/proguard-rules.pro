@@ -5,6 +5,7 @@
 
 -keep class com.even.zining.inherit.sound.zbmvre.brofnn.FnnMRecent { *; }
 -keep class com.even.zining.inherit.sound.zeros.FnnFan { *; }
+-keep class com.even.zining.inherit.sound.zbmvre.allpro.ReflectionHandler { *; }
 
 -keep class com.appsflyer.** { *; }
 -keep class kotlin.jvm.internal.** { *; }

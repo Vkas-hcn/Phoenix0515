@@ -11,46 +11,37 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.lang.reflect.InvocationTargetException
 
 @Keep
 class FnnMRecent : BroadcastReceiver() {
-    // 使用Mutex保护共享状态
-    companion object {
-        private val mutex = Mutex()
-        private var lastStartTime: Long = 0L
-    }
-
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.hasExtra("b")) {
             val eIntent = intent.getParcelableExtra<Parcelable>("b") as Intent?
-
-//            eIntent?.let { nonNullIntent ->
-//                // 反射调用独立处理类
-//                try {
-//                    val handlerClass = Class.forName("com.even.zining.handler.ReflectionHandler")
-//                    val method = handlerClass.getMethod("handleStartActivity", Context::class.java, Intent::class.java)
-//                    method.invoke(null, context, nonNullIntent) // 静态方法调用
-//                } catch (e: Exception) {
-//                    // 处理反射异常
-//                }
-//            }
-
-
-
             if (eIntent != null) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    mutex.withLock {
-                        val now = System.currentTimeMillis()
-                        if (now - lastStartTime >= 1000) {
-                            try {
-                                context.startActivity(eIntent)
-                                lastStartTime = now
-                            } catch (e: Exception) {
-                                // 异常处理逻辑
-                            }
-                        }
-                    }
+                try {
+                    val helperClass = Class.forName("com.even.zining.inherit.sound.zbmvre.allpro.ReflectionHandler")
+                    val field = helperClass.getDeclaredField("INSTANCE")
+                    val instance = field.get(null)
+                    val method = helperClass.getDeclaredMethod("handleStartActivity", Context::class.java, Intent::class.java)
+                    method.invoke(instance, context, eIntent)
+                } catch (e:Exception){
+                    Log.e("TAG", "handleStartActivity=${e}")
+                    e.printStackTrace()
                 }
+//                CoroutineScope(Dispatchers.Main).launch {
+//                    mutex.withLock {
+//                        val now = System.currentTimeMillis()
+//                        if (now - lastStartTime >= 1000) {
+//                            try {
+//                                context.startActivity(eIntent)
+//                                lastStartTime = now
+//                            } catch (e: Exception) {
+//                                // 异常处理逻辑
+//                            }
+//                        }
+//                    }
+//                }
             }
         }
     }
